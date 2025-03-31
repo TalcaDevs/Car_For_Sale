@@ -1,10 +1,16 @@
 // src/components/CarDetails.jsx
 import { useEffect, useState } from 'react';
+import Lightbox from './Lightbox';
 
 export default function CarDetails({ carData }) {
   // Estado para controlar si las imágenes están cargadas
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
+  
+  // Estados para el lightbox
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [startIndex, setStartIndex] = useState(0);
+  const [galleryImages, setGalleryImages] = useState([]);
 
   useEffect(() => {
     // Asegurarse de que las imágenes estén cargadas
@@ -44,6 +50,32 @@ export default function CarDetails({ carData }) {
   const shouldShowItem = (category) => {
     return activeFilter === 'all' || category === activeFilter;
   };
+  
+  // Función para abrir el lightbox con un índice específico
+  const openLightbox = (index) => {
+    setStartIndex(index);
+    setLightboxOpen(true);
+    setGalleryImages(carData.images);
+  };
+
+  // Función para abrir la galería completa
+  const openFullGallery = () => {
+    setStartIndex(0);
+    setLightboxOpen(true);
+    
+    // Generar las rutas para las 14 imágenes adicionales
+    const additionalImages = [];
+    for (let i = 1; i <= 14; i++) {
+      additionalImages.push(`/img/${i}.JPEG`);
+    }
+    
+    setGalleryImages(additionalImages);
+  };
+
+  // Función para cerrar el lightbox
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+  };
 
   return (
     <>
@@ -74,6 +106,7 @@ export default function CarDetails({ carData }) {
                   key={index} 
                   className={`gallery-item ${category}`}
                   style={{ display: shouldShowItem(category) ? 'block' : 'none' }}
+                  onClick={() => openLightbox(index)}
                 >
                   <div className="gallery-img-wrapper">
                     <img 
@@ -91,8 +124,25 @@ export default function CarDetails({ carData }) {
               );
             })}
           </div>
+          
+          <div className="gallery-action-buttons">
+            <button 
+              className="view-more-button" 
+              onClick={openFullGallery}
+            >
+              <i className="fas fa-images"></i> Ver Galería Completa
+            </button>
+          </div>
         </div>
       </section>
+      
+      {/* Componente Lightbox */}
+      <Lightbox 
+        isOpen={lightboxOpen} 
+        onClose={closeLightbox} 
+        images={galleryImages}
+        startIndex={startIndex}
+      />
 
       {/* Sección de especificaciones */}
       <section className="car-details" id="specs">
